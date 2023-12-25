@@ -1,0 +1,122 @@
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<!-- 添加一个隐藏的输入字段用于存储滚动位置 -->
+<input type="hidden" id="scrollPosition" name="scroll_position" value="0">
+<script>
+    // 获取传递过来的滚动位置
+    var scrollPosition = {{ scroll_position | default(0) }};
+
+    // 滚动到之前记录的位置
+    window.scrollTo(0, scrollPosition);
+</script>
+{% extends 'base.html' %}
+{% from 'bootstrap/form.html' import render_form %}
+{% block content %}
+<a href="/logout">退出登录</a>
+<h1>你好! {{ session['username'] }}</h1>
+
+    <div class="hello-form">
+        {{ render_form(form, action=request.full_path) }}
+    </div>
+
+    <h5>{{ messages|length }} messages
+        <small class="float-right">
+            <a href="#bottom" title="Go Bottom">↓</a>
+        </small>
+    </h5>
+
+    <div class="list-group">
+        {% for message in messages %}
+
+            <a class="list-group-item list-group-item-action flex-column">
+                <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1 text-success">{{ message.name }}
+                        <small class="text-muted"> #{{ loop.revindex }}</small>
+                    </h5>
+                    <small data-toggle="tooltip" data-placement="top"
+                           data-timestamp="{{ message.timestamp.strftime('%Y-%m-%dT%H:%M:%SZ') }}"
+                           data-delay="500">
+                        {{ moment(message.timestamp).fromNow(refresh=True) }}
+                    </small>
+                </div>
+
+                <p class="mb-1">{{ message.body }}</p>
+
+<div class="mt-4">
+    <h5>历史回复:</h5>
+    {% for reply in message.replies %}
+        <div class="card mb-2">
+            <div class="card-body">
+                <p class="card-text">{{ reply.body }}</p>
+
+
+        </div>
+            </div>
+    {% endfor %}
+</div>
+
+<div class="card-body d-flex justify-content-between align-items-center">
+ <form method="post" action="{{ url_for('like_message', message_id=message.id) }}">
+                    <button class="btn btn-sm btn-link">赞</button> <!-- 点赞按钮 -->
+     <i class="far fa-thumbs-up mr-1"></i> <!-- 未点赞的图标 -->
+                    <p>{{ message.likes }}</p> <!-- 点赞数量 -->
+     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css"
+           integrity="sha512-cN6BC8luLhrW4vw/p3xL2r+bjKxmAKS5VGWB9oKUpp9FpRfIE5Zr1dTkLc5s7TkEfAba7ic8GHg6r8C7Cvkwg==" crossorigin="anonymous" />
+</form>
+                <form method="post" action="{{ url_for('view_message', message_id=message.id) }}">
+    <div class="form-group">
+        <label for="reply_body"></label>
+        <input type="text" class="form-control" name="reply_body" id="reply_body" placeholder="良言一句三冬暖，恶语伤人六月寒">
+    </div>
+    <button type="submit" class="btn btn-primary">回复</button>
+
+</div>
+<!-- 添加JavaScript代码 -->
+<script>
+    var replyInput = document.getElementById('reply_body');
+    var placeholderInput = document.getElementById('reply_body_placeholder');
+
+    replyInput.addEventListener('focus', function() {
+        placeholderInput.placeholder = '';
+    });
+
+    replyInput.addEventListener('blur', function() {
+        if (replyInput.value === '') {
+            placeholderInput.placeholder = '良言一句三冬暖，恶语伤人六月寒';
+        }
+    });
+
+    document.getElementById('showReplyForm').addEventListener('click', function() {
+        document.getElementById('replyFormContainer').style.display = 'block';
+    });
+</script>
+
+<!-- 添加JavaScript代码 -->
+<script>
+    document.getElementById('showReplyForm').addEventListener('click', function() {
+        document.getElementById('replyFormContainer').style.display = 'block';
+    });
+</script>
+
+            </a>
+        {% endfor %}
+    </div>
+    {{ pagination.links }}
+
+{% endblock %}
+
+<!-- 添加在页面底部的 JavaScript 代码 -->
+<script>
+    // 检查是否存在 Cookie
+    var lastVisited = document.cookie.replace(/(?:(?:^|.*;\s*)last_visited\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+
+    // 如果存在 Cookie，则滚动到上次访问的位置
+    if (lastVisited) {
+        var element = document.querySelector(lastVisited);
+        if (element) {
+            element.scrollIntoView();
+        }
+    }
+</script>
